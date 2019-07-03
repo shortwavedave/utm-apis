@@ -1,0 +1,86 @@
+asyncapi: "1.2.0"
+info:
+  description: |
+    This API describes the messaging interface that a USS must implement to be
+    part of the USS Network.  This API allows for asynchronous communication of
+    data between USS Instances and from FIMS to a USS regarding new USS Instances.
+  version: v4
+  title: USS Required Messaging API
+  termsOfService: |
+
+    A. No Warranty: THE SUBJECT SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY
+    WARRANTY OF ANY KIND, EITHER EXPRESSED, IMPLIED, OR STATUTORY, INCLUDING,
+    BUT NOT LIMITED TO, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL CONFORM TO
+    SPECIFICATIONS, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+    PARTICULAR PURPOSE, OR FREEDOM FROM INFRINGEMENT, ANY WARRANTY THAT THE
+    SUBJECT SOFTWARE WILL BE ERROR FREE, OR ANY WARRANTY THAT DOCUMENTATION, IF
+    PROVIDED, WILL CONFORM TO THE SUBJECT SOFTWARE. THIS AGREEMENT DOES NOT, IN
+    ANY MANNER, CONSTITUTE AN ENDORSEMENT BY GOVERNMENT AGENCY OR ANY PRIOR
+    RECIPIENT OF ANY RESULTS, RESULTING DESIGNS, HARDWARE, SOFTWARE PRODUCTS OR
+    ANY OTHER APPLICATIONS RESULTING FROM USE OF THE SUBJECT SOFTWARE. FURTHER,
+    GOVERNMENT AGENCY DISCLAIMS ALL WARRANTIES AND LIABILITIES REGARDING
+    THIRD-PARTY SOFTWARE, IF PRESENT IN THE ORIGINAL SOFTWARE, AND DISTRIBUTES
+    IT "AS IS."
+
+    B. Waiver and Indemnity: RECIPIENT AGREES TO WAIVE ANY AND ALL CLAIMS
+    AGAINST THE UNITED STATES GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, AS
+    WELL AS ANY PRIOR RECIPIENT. IF RECIPIENT''S USE OF THE SUBJECT SOFTWARE
+    RESULTS IN ANY LIABILITIES, DEMANDS, DAMAGES, EXPENSES OR LOSSES ARISING
+    FROM SUCH USE, INCLUDING ANY DAMAGES FROM PRODUCTS BASED ON, OR RESULTING
+    FROM, RECIPIENT''S USE OF THE SUBJECT SOFTWARE, RECIPIENT SHALL INDEMNIFY
+    AND HOLD HARMLESS THE UNITED STATES GOVERNMENT, ITS CONTRACTORS AND
+    SUBCONTRACTORS, AS WELL AS ANY PRIOR RECIPIENT, TO THE EXTENT PERMITTED BY
+    LAW. RECIPIENT''S SOLE REMEDY FOR ANY SUCH MATTER SHALL BE THE IMMEDIATE,
+    UNILATERAL TERMINATION OF THIS AGREEMENT.
+  contact:
+    name: 'NASA Ames Research Center, Aviation Systems Division'
+    url: 'https://utm.arc.nasa.gov/'
+    email: joseph.l.rios@nasa.gov
+  license:
+    name: NASA Open Source Agreement
+    url: 'https://ti.arc.nasa.gov/opensource/nosa/'
+
+baseTopic: 'uss'
+
+security:
+  - Oauth: []
+
+servers:
+  - url: '{baseurl}:{port}/{application}'
+    description: Allows you to connect using the MQTT protocol.
+    scheme: wss
+    variables:
+      baseurl:
+        default: 'base.url.is.currently.unset'
+        description: The base URL for this server.
+      application:
+        default: utm
+        description: You can find your `app-id` in our control panel, under the auth tab.
+      port:
+        default: '443'
+        description: The port for connecting to this server for this API.
+
+topics:
+  positions.1.0.event.position.{gufi}.announce:
+    parameters:
+      - name: gufi
+        description: The GUFI of the operation for which this topic will supply positions.
+        schema:
+          type: string
+          format: uuid
+          minLength: 36
+          maxLength: 36
+          pattern: >-
+            '^[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-4[0-9a-fA-F]{3}\\-[8-b][0-9a-fA-F]{3}\\-[0-9a-fA-F]{12}$'
+          example: '00000000-0000-4444-8888-FEEDDEADBEEF'
+          description: A valid UUIDv4 referencing a valid Operation GUFI.
+    subscribe:
+      payload:
+        $ref: "https://raw.githubusercontent.com/nasa/utm-apis/v4-draft/utm-domains/utm-domain-commons.yaml#/definitions/Position"
+
+components:
+  securitySchemes:
+    Oauth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
